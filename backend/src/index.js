@@ -7,6 +7,16 @@ import userRoutes from './routes/userRoutes.js'; // 1. استيراد المسا
 
 dotenv.config();
 
+// هذا الكود اختياري، إذا كنت تريد السيرفر أن يحاول الربط عند البدء
+const { execSync } = require('child_process');
+try {
+  console.log("Attempting to sync database...");
+  execSync('npx prisma db push --accept-data-loss');
+  console.log("Database synced successfully.");
+} catch (error) {
+  console.error("Database sync failed, but starting server anyway...", error);
+}
+
 const app = express();
 
 app.use(cors()); 
