@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+@theme {
+  --color-traxos-blue: #0a1d37;
+  --color-traxos-orange: #ff6b00;
+}
+
+/* لضمان أن الطول يأخذ كامل الشاشة */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}

@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  otp String?
+  otpExpires DateTime?
+  isVerified  Boolean  @default(false)
+  isNewUser Boolean  @default(true)
+  password  String
+  name      String?
+  role      String   @default("USER") // استخدم String بدلاً من Enum
+  orders    Order[]
+  createdAt DateTime @default(now())
+}
+
+
+model Service {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  price       Float
+  orders      Order[]
+}
+
+model Order {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  
+  // الحقل الجديد لنوع الشحن
+  shippingType    String   @default("شحن جوي") // جوي أو بحري
+  
+  // جعل الخدمة اختيارية لكي لا يتوقف النظام إذا كان جدول الخدمات فارغاً
+  serviceId       String?  
+  service         Service? @relation(fields: [serviceId], references: [id])
+  
+  status          String   @default("قيد المعالجة") 
+  trackingNumber  String?  @unique
+  shippingCompany String?  
+  trackingDetails String?  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
