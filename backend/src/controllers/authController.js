@@ -5,16 +5,28 @@ import nodemailer from 'nodemailer';
 
 const prisma = new PrismaClient();
 
+// const transporter = nodemailer.createTransport({
+//   host: 'smtp.gmail.com',
+//   port: 465,
+//   secure: true, 
+//   auth: {
+//     user: 'traxos.ly@gmail.com',
+//     pass: 'ayhh fqwt lkgf mezf'
+//   }
+// });
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
-  port: 465,
-  secure: true, 
+  port: 587,
+  secure: false, // يجب أن تكون false للمنفذ 587
   auth: {
     user: 'traxos.ly@gmail.com',
-    pass: 'ayhh fqwt lkgf mezf'
-  }
+    pass: 'ayhhfqwtlkgfmezf' // تأكد من حذف المسافات تماماً
+  },
+  tls: {
+    rejectUnauthorized: false // يتجاوز مشاكل فحص الشهادات في Render
+  },
+  connectionTimeout: 10000 // زيادة وقت محاولة الاتصال لـ 10 ثوانٍ
 });
-
 // --- 1. طلب التسجيل وإرسال الكود ---
 export const registerRequest = async (req, res) => {
   try {

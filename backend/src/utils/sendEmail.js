@@ -1,16 +1,30 @@
 import nodemailer from 'nodemailer';
 
 export const sendContactEmail = async (name, message) => {
+  // const transporter = nodemailer.createTransport({
+  //   service: 'gmail',
+  //   host: 'smtp.gmail.com',
+  //   port: 465,
+  //   secure: true,
+  //   auth: {
+  //     user: 'traxos.ly@gmail.com',
+  //     pass: 'ayhh fqwt lkgf mezf' // الرمز من جوجل (بدون مسافات)
+  //   }
+  // });
+
   const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
-    auth: {
-      user: 'traxos.ly@gmail.com',
-      pass: 'ayhh fqwt lkgf mezf' // الرمز من جوجل (بدون مسافات)
-    }
-  });
+  host: 'smtp.gmail.com',
+  port: 587,
+  secure: false, // يجب أن تكون false للمنفذ 587
+  auth: {
+    user: 'traxos.ly@gmail.com',
+    pass: 'ayhhfqwtlkgfmezf' // تأكد من حذف المسافات تماماً
+  },
+  tls: {
+    rejectUnauthorized: false // يتجاوز مشاكل فحص الشهادات في Render
+  },
+  connectionTimeout: 10000 // زيادة وقت محاولة الاتصال لـ 10 ثوانٍ
+});
 
   const mailOptions = {
     from: `"موقع تراكسوس" <traxos.ly@gmail.com>`,
