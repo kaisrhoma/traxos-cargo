@@ -19,13 +19,41 @@ router.put('/update/:id', verifyToken, isAdmin, updateOrderStatus);
 router.get('/track/:trackingNumber', verifyToken, trackOrder);
 
 
+// router.post('/contact', verifyToken, async (req, res) => {
+//   const { name, message } = req.body;
+//   try {
+//     await sendContactEmail(name, message);
+//     res.status(200).json({ message: "تم إرسال الرسالة بنجاح" });
+//   } catch (error) {
+//     res.status(500).json({ message: "فشل إرسال الرسالة" });
+//   }
+// });
+
 router.post('/contact', verifyToken, async (req, res) => {
   const { name, message } = req.body;
+  
+  // فحص بسيط للبيانات قبل البدء
+  if (!name || !message) {
+    return res.status(400).json({ message: "الاسم والرسالة مطلوبان" });
+  }
+
   try {
+    console.log(`⏳ جاري محاولة إرسال بريد لـ: ${name}...`);
     await sendContactEmail(name, message);
+    console.log("✅ تمت العملية بنجاح");
     res.status(200).json({ message: "تم إرسال الرسالة بنجاح" });
   } catch (error) {
-    res.status(500).json({ message: "فشل إرسال الرسالة" });
+    // طباعة تفاصيل الخطأ في Render Logs
+    console.error("❌ تفاصيل فشل الإرسال:", {
+      message: error.message,
+      code: error.code,
+      command: error.command
+    });
+    
+    res.status(500).json({ 
+      message: "فشل إرسال الرسالة",
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined 
+    });
   }
 });
 
