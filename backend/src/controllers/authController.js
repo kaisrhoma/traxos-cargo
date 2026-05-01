@@ -5,16 +5,6 @@ import { sendOTPEmail } from '../utils/sendEmail.js';
 
 const prisma = new PrismaClient();
 
-// const transporter = nodemailer.createTransport({
-//   host: 'smtp.gmail.com',
-//   port: 465,
-//   secure: true, 
-//   auth: {
-//     user: 'traxos.ly@gmail.com',
-//     pass: 'ayhh fqwt lkgf mezf'
-//   }
-// });
-
 // --- 1. طلب التسجيل وإرسال الكود ---
 export const registerRequest = async (req, res) => {
   try {
@@ -34,19 +24,6 @@ export const registerRequest = async (req, res) => {
       update: { otp, otpExpires, password: hashedPassword, name, isVerified: false },
       create: { email, name, password: hashedPassword, otp, otpExpires, isVerified: false }
     });
-
-    const mailOptions = {
-      from: '"تراكسوس كارجو" <traxos.ly@gmail.com>',
-      to: email,
-      subject: 'رمز التحقق الخاص بحسابك - Traxos',
-      html: `<div dir="rtl" style="text-align: center; font-family: sans-serif;">
-              <h2 style="color: #0a1d37;">مرحباً بك في Traxos Cargo</h2>
-              <p>كود التحقق الخاص بك هو:</p>
-              <h1 style="color: #ff6b00; letter-spacing: 5px;">${otp}</h1>
-              <p>صالح لمدة 10 دقائق.</p>
-            </div>`
-    };
-
     await sendOTPEmail(email, otp);
     res.status(200).json({ message: 'تم إرسال الرمز بنجاح' });
   } catch (error) {

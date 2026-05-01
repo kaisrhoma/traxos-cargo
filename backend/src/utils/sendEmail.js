@@ -29,7 +29,7 @@ export const sendOTPEmail = async (email, otp) => {
 // رسالة تواصل
 export const sendContactEmail = async (name, message) => {
   return resend.emails.send({
-    from: 'onboarding@resend.dev',
+    from: 'Traxos <no-reply@traxos.store>',
     to: 'traxos.ly@gmail.com',
     subject: `📩 رسالة جديدة من ${name}`,
     html: `<p>${message}</p>`
