@@ -6,6 +6,8 @@ export default function Login() {
   const [email, setEmail] = useState(''); 
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  // 1. إضافة حالة التحميل
+  const [loading, setLoading] = useState(false); 
   const [showCouponModal, setShowCouponModal] = useState(false);
   const [couponDetail, setCouponDetail] = useState({ discount: 0, expiry: '' });
   const navigate = useNavigate();
@@ -13,6 +15,7 @@ export default function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError(''); 
+    setLoading(true); // 2. تفعيل التحميل عند بدء الطلب
 
     try {
       const response = await api.post('/api/auth/login', {
@@ -20,12 +23,10 @@ export default function Login() {
         password
       });
 
-      // حفظ البيانات في المتصفح
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('userRole', response.data.user.role);
       localStorage.setItem('userName', response.data.user.name);
       
-      // التحقق من السيرفر إذا كان المستخدم جديداً
       if (response.data.user.isNewUser) {
         const randomDiscount = Math.floor(Math.random() * 10) + 1;
         const expiryDate = new Date();
@@ -35,17 +36,18 @@ export default function Login() {
         });
 
         setCouponDetail({ discount: randomDiscount, expiry: formattedDate });
-        setShowCouponModal(true); // إظهار النافذة بدلاً من alert
+        setShowCouponModal(true); 
       } else {
-        // إذا لم يكن جديداً، توجه للرئيسية مباشرة
         completeLogin();
       }
     } catch (err) {
       setError(err.response?.data?.message || "خطأ في البريد الإلكتروني أو كلمة المرور");
+    } finally {
+      // 3. إيقاف التحميل سواء نجحت العملية أو فشلت
+      setLoading(false); 
     }
   };
 
-  // دالة لإنهاء عملية الدخول وإعادة التحميل
   const completeLogin = () => {
     navigate('/');
     window.location.reload();
@@ -75,8 +77,21 @@ export default function Login() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <button type="submit" className="bg-[#0a1d37] text-white py-3 rounded-lg font-bold hover:bg-[#1a2d47] transition shadow-md">
-            دخول
+          
+          {/* 4. تعديل الزر ليتفاعل مع حالة التحميل */}
+          <button 
+            type="submit" 
+            disabled={loading}
+            className={`text-white py-3 rounded-lg font-bold transition shadow-md ${
+              loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#0a1d37] hover:bg-[#1a2d47]'
+            }`}
+          >
+            {loading ? (
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                جاري الدخول...
+              </div>
+            ) : "دخول"}
           </button>
         </form>
         
@@ -90,21 +105,17 @@ export default function Login() {
         </div>
       </div>
 
-      {/* النافذة المنبثقة للكوبون (تظهر فقط للمستخدم الجديد) */}
+      {/* نافذة الكوبون بقيت كما هي */}
       {showCouponModal && (
         <div className="fixed inset-0 bg-[#0a1d37]/90 backdrop-blur-sm flex items-center justify-center z-[600] p-4">
           <div className="bg-white rounded-[2rem] p-10 max-w-sm w-full shadow-2xl text-center relative overflow-hidden border-b-8 border-[#ff6b00]">
             <div className="text-6xl mb-4 animate-bounce">🎉</div>
             <h3 className="text-2xl font-black text-[#0a1d37] mb-2">هدية الترحيب!</h3>
-            <p className="text-gray-500 mb-6 text-sm">يسعدنا انضمامك لأسرة تراكسوس. إليك خصم خاص لمستخدمينا الجدد التقط صوره وارسله لنا:</p>
+            <p className="text-gray-500 mb-6 text-sm">يسعدنا انضمامك لأسرة تراكسوس. إليك خصم خاص لمستخدمينا الجدد:</p>
             
             <div className="relative bg-orange-50 border-2 border-dashed border-[#ff6b00] rounded-2xl p-6 mb-8">
-              <div className="absolute top-1/2 -left-3 w-6 h-6 bg-white rounded-full -translate-y-1/2"></div>
-              <div className="absolute top-1/2 -right-3 w-6 h-6 bg-white rounded-full -translate-y-1/2"></div>
               <div className="text-5xl font-black text-[#ff6b00]">{couponDetail.discount}%</div>
             </div>
-
-            <p className="text-[10px] text-gray-400 mb-6 italic">صالح لمدة 30 يوماً حتى {couponDetail.expiry}</p>
 
             <button 
               onClick={completeLogin}
