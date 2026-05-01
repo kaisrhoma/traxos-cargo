@@ -6,7 +6,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 export const sendOTPEmail = async (email, otp) => {
   try {
     const response = await resend.emails.send({
-      from: 'onboarding@resend.dev',
+      from: 'Traxos <no-reply@traxos.store>',
       to: email,
       subject: 'رمز التحقق - Traxos',
       html: `
