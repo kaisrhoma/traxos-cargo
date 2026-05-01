@@ -1,37 +1,37 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+// إرسال OTP
+export const sendOTPEmail = async (email, otp) => {
+  try {
+    const response = await resend.emails.send({
+      from: 'onboarding@resend.dev',
+      to: email,
+      subject: 'رمز التحقق - Traxos',
+      html: `
+        <div dir="rtl" style="text-align:center;font-family:sans-serif;">
+          <h2 style="color:#0a1d37;">مرحباً بك في Traxos</h2>
+          <p>رمز التحقق الخاص بك:</p>
+          <h1 style="color:#ff6b00;letter-spacing:5px;">${otp}</h1>
+          <p>صالح لمدة 10 دقائق</p>
+        </div>
+      `
+    });
+
+    console.log("✅ OTP email sent:", response);
+  } catch (error) {
+    console.error("❌ Email send error:", error);
+    throw error;
+  }
+};
+
+// رسالة تواصل
 export const sendContactEmail = async (name, message) => {
-  // const transporter = nodemailer.createTransport({
-  //   service: 'gmail',
-  //   host: 'smtp.gmail.com',
-  //   port: 465,
-  //   secure: true,
-  //   auth: {
-  //     user: 'traxos.ly@gmail.com',
-  //     pass: 'ayhh fqwt lkgf mezf' // الرمز من جوجل (بدون مسافات)
-  //   }
-  // });
-
-  const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false, // يجب أن تكون false للمنفذ 587
-  auth: {
-    user: 'traxos.ly@gmail.com',
-    pass: 'ayhhfqwtlkgfmezf' // تأكد من حذف المسافات تماماً
-  },
-  tls: {
-    rejectUnauthorized: false // يتجاوز مشاكل فحص الشهادات في Render
-  },
-  connectionTimeout: 10000 // زيادة وقت محاولة الاتصال لـ 10 ثوانٍ
-});
-
-  const mailOptions = {
-    from: `"موقع تراكسوس" <traxos.ly@gmail.com>`,
+  return resend.emails.send({
+    from: 'onboarding@resend.dev',
     to: 'traxos.ly@gmail.com',
-    subject: `📩 رسالة تواصل جديدة من: ${name}`,
-    text: `لديك رسالة جديدة من الموقع:\n\nالاسم: ${name}\nالرسالة: ${message}`,
-  };
-
-  return transporter.sendMail(mailOptions);
+    subject: `📩 رسالة جديدة من ${name}`,
+    html: `<p>${message}</p>`
+  });
 };

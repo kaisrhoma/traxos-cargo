@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import nodemailer from 'nodemailer';
+import { sendOTPEmail } from '../utils/sendEmail.js';
 
 const prisma = new PrismaClient();
 
@@ -14,19 +14,7 @@ const prisma = new PrismaClient();
 //     pass: 'ayhh fqwt lkgf mezf'
 //   }
 // });
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false, // يجب أن تكون false للمنفذ 587
-  auth: {
-    user: 'traxos.ly@gmail.com',
-    pass: 'ayhhfqwtlkgfmezf' // تأكد من حذف المسافات تماماً
-  },
-  tls: {
-    rejectUnauthorized: false // يتجاوز مشاكل فحص الشهادات في Render
-  },
-  connectionTimeout: 10000 // زيادة وقت محاولة الاتصال لـ 10 ثوانٍ
-});
+
 // --- 1. طلب التسجيل وإرسال الكود ---
 export const registerRequest = async (req, res) => {
   try {
@@ -59,7 +47,7 @@ export const registerRequest = async (req, res) => {
             </div>`
     };
 
-    await transporter.sendMail(mailOptions);
+    await sendOTPEmail(email, otp);
     res.status(200).json({ message: 'تم إرسال الرمز بنجاح' });
   } catch (error) {
     console.error(error);
@@ -168,7 +156,7 @@ export const forgotPasswordRequest = async (req, res) => {
             </div>`
     };
 
-    await transporter.sendMail(mailOptions);
+    await sendOTPEmail(email, otp);
     res.json({ message: "تم إرسال رمز التحقق إلى بريدك" });
   } catch (error) {
     res.status(500).json({ message: "خطأ في السيرفر" });
